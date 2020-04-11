@@ -67,7 +67,7 @@ while True:
                 state='Found'
                 result = api.barcode_search(barcodeData,barcode_type='2d',product_info=False)
                 found.add(barcodeData)
-                with codecs.open(barcodefile,'w', encoding='latin-1') as file:
+                with codecs.open(barcodefile,'a', encoding='latin-1') as file:
                     file.write('{}\n'.format(codecs.decode(barcodeData,'latin-1')))
                     file.flush()
             else:
