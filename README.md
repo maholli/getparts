@@ -13,11 +13,11 @@ Some setup required. See 👇 for a guide setting up a Digikey API account and r
 # Supplier Barcodes
 
 - [ ] ✔ Digikey: DK provides a fully functional barcode API for product and invoice info. 👍 good job DK!
-   - 2D: specific API exists for invoice and product info queries. QR code is data matrix format.
+   - 2D: specific API exists for invoice and product info queries. QR code is data matrix format.<br>Always starts with `[)>`
    - 1D: specific API exists for invoice and product info queries. QR code is data matrix format.
 - [ ] ➖ Mouser: There's a part number query API, but no native barcode searching. 
-   - 2D: PN does appear to be stored as plain-text within the barcode. Need to look into doing some sort of regex to extra PN and invoice number.
+   - 2D: PN does appear to be stored as plain-text within the barcode. Need to look into doing some sort of regex to extra PN and invoice number. Always starts with `>[)>`
    - 1D: String ~8 characters in length. Doesn't return anything useful from Mouser or google searches.
 - [ ] ❌ LCSC: No API. 
-   - 2D: I am starting to see QR codes on component bags (format is not data matrix like DK or Mouser). My LCSC 2D barcodes have `productCode`, `orderNo`, `pickerNo`,`pickTime`, and `checkCode`. So far all I can do is search on LCSC for the product code. 
+   - 2D: I am starting to see QR codes on component bags (format is not data matrix like DK or Mouser... Maybe JSON?). My LCSC 2D barcodes have `productCode`, `orderNo`, `pickerNo`,`pickTime`, and `checkCode`. So far all I can do is search on LCSC for the product code. 
    - 1D: String ~10 characters in length. Can't extract anything useful from these.
