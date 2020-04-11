@@ -1,9 +1,9 @@
 # Barcode scanner
 
-Scan Digikey component bags and return product information. Uses Python3. Works for 2D data matrix QR codes and 1D barcodes.
+Scan component bags (curren't just Digikey) and return product information. Uses Python3. Works for 2D data matrix QR codes and 1D barcodes.
 
-- barcode_api.py handles all the API calls and refresh tokens (when necessary).
-- barcode_scan.py is an example using a webcam. There are lots of debug messages to help others troubleshoot their own scripts.
+- ![barcode_api.py](/barcode_api.py) handles all the API calls and refresh tokens (when necessary).
+- ![barcode_scan.py](/barcode_scan.py) is an example using a webcam. There are lots of debug messages to help others troubleshoot their own scripts.
 
 Some setup required. See 👇 for a guide setting up a Digikey API account and running the python script.
 ### ![Step-by-step Tutorial](/tutorial.md)
