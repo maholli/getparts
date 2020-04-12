@@ -1,8 +1,9 @@
 '''
 Python3
 
-Example barcode scanner and DigiKey API helper
+Example barcode scanner for electronic component suppliers (digikey, mouser, LCSC)
 https://github.com/maholli/barcode-scanner
+M.Holliday
 '''
 
 from pyzbar import pyzbar
@@ -14,20 +15,22 @@ import barcode_api
 import os.path 
 from os import path
 
-# Update these following the guide on github (linked above)
 app_credentials= {
     'code': 'AAA',
     'client_id': "BBB",
-    'client_secret': "CCC"
+    'client_secret': "CCC",
+    'mouser_key': "DDD"
 }
 
-api = barcode_api.digikey(app_credentials)
+# initialize barcode_api with our API credentials
+api = barcode_api.barcode(app_credentials,debug=False)
 state='Searching'
 states={
     'Searching':(0,0,255),
     'Found':(0,255,0),
     'Duplicate':(0,165,255),
 }
+
 # File to save barcodes
 barcodefile='barcodes.txt'
 found = set()
@@ -38,55 +41,49 @@ print("Starting video stream...")
 vs=cv2.VideoCapture(0)
 if vs is None or not vs.isOpened():
     raise TypeError('Error starting video stream\n\n')
-print("Warming webcam for 2 seconds...")
-time.sleep(2)
 
-# Webcam-specific tweaks
-vs.set(cv2.CAP_PROP_FRAME_WIDTH , 640)
-vs.set(cv2.CAP_PROP_FRAME_HEIGHT , 480)
-vs.set(cv2.CAP_PROP_BRIGHTNESS, 120)
-vs.set(cv2.CAP_PROP_CONTRAST, 170)
-vs.set(cv2.CAP_PROP_SATURATION, 0)
-vs.set(cv2.CAP_PROP_HUE, 13)
-vs.set(cv2.CAP_PROP_GAIN, 40)
-vs.set(cv2.CAP_PROP_EXPOSURE, -6) # min: -7  , max: -1  , increment:1
-vs.set(cv2.CAP_PROP_TEMPERATURE, 5000)
-vs.set(cv2.CAP_PROP_FOCUS, 240) # min: 0   , max: 255 , increment:5
-
-
-state='Searching'
-# loop over the frames from the video stream
 while True:
+    code=False
+    # read frame from webcam
     _,frame2 = vs.read()
+    # check for a data matrix barcode
     barcodes = pylibdmtx.decode(frame2,timeout=10)
     if barcodes:
-        # loop over the detected barcodes
-        for barcode in barcodes:
-            barcodeData = barcode.data
+        code=True
+    # if no data matrix, check for any other barcodes
+    else:
+        barcodes=pyzbar.decode(frame2)
+        if barcodes:
+            code=True
+    if code:
+        for item in barcodes:
+            barcodeData = item.data
+            # find and draw barcode outline
+            try:
+                pts=[]
+                [pts.append([i.x,i.y]) for i in item.polygon]
+                poly=np.array([pts],np.int32)
+                cv2.polylines(frame2, [poly], True, (0,0,255),2)
+            except AttributeError:
+                # data matrix
+                (x, y, w, h) = item.rect
+                cv2.rectangle(frame2,(x,y),(x+w, y+h),(0,0,255),2)
+            # if we haven't seen this barcode this session, add it to our list
             if barcodeData not in found:
                 state='Found'
-                result = api.barcode_search(barcodeData,barcode_type='2d',product_info=False)
                 found.add(barcodeData)
+                print(barcodeData.decode())
+                # query the barcode_api.py for barcode
+                result = api.search(item,product_info=False)
                 with codecs.open(barcodefile,'a', encoding='latin-1') as file:
                     file.write('{}\n'.format(codecs.decode(barcodeData,'latin-1')))
                     file.flush()
             else:
                 state='Duplicate'
+        code=False
     else:
-        bar1d=pyzbar.decode(frame2)
-        if bar1d:
-            state='Found'
-            barcodeData = bar1d[0].data
-            if barcodeData not in found:
-                result = api.barcode_search(barcodeData,barcode_type='1d',product_info=False)
-                found.add(barcodeData)
-                with codecs.open(barcodefile,'a', encoding='latin-1') as file:
-                    file.write('{}\n'.format(codecs.decode(barcodeData,'latin-1')))
-                    file.flush()
-        else:
-            state='Searching'
-
-    # show the output frame
+        state='Searching'
+    # update the video stream window
     cv2.putText(frame2,str(state),(10,10),cv2.FONT_HERSHEY_SIMPLEX,0.5,states[state],2,cv2.LINE_AA)
     cv2.imshow("Barcode Scanner", frame2)
     key = cv2.waitKey(1) & 0xFF
@@ -95,6 +92,5 @@ while True:
     if key == ord("q"):
         break
 
-# close the output CSV file do a bit of cleanup
 print("[INFO] cleaning up...")
 cv2.destroyAllWindows()

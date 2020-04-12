@@ -1,13 +1,17 @@
 '''
-Barcode API interface for digikey and mouser
+Python3
 
-M.Holliday 2020
+API tool for electronic component suppliers (digikey, mouser, LCSC)
+https://github.com/maholli/barcode-scanner
+M.Holliday
 '''
 
 import requests
-import json
+import json, re
 import os.path 
 from os import path
+from types import SimpleNamespace
+import webbrowser
 
 oauth_headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
@@ -18,26 +22,47 @@ oauth_body = {
     'grant_type': 'refresh_token',
     'refresh_token': ''
 }
-app_headers = {
+digi_headers = {
      "X-DIGIKEY-Client-Id": "",
     'authorization': "",
     'accept': "application/json"
-    }
+}
+mouser_headers = {
+    'Content-Type': "application/json",
+    'accept': "application/json"
+}
 
 def printlevel(level,text):
     print('\t'*level+str(text))
 
-class digikey:
+class barcode:
     RECORDS_FILE = 'api_records_digi.txt'
     def __init__(self,cred,debug=False):
         self.DEBUG=debug
-        self.barcode=''
-        self.url2D="https://api.digikey.com/Barcoding/v3/Product2DBarcodes/".encode('utf-8')
-        self.url1D="https://api.digikey.com/Barcoding/v3/ProductBarcodes/".encode('utf-8')
-        self.urlProd="https://api.digikey.com/Search/v3/Products/".encode('utf-8')
+        self.digi2D="https://api.digikey.com/Barcoding/v3/Product2DBarcodes/".encode('utf-8')
+        self.digi1D="https://api.digikey.com/Barcoding/v3/ProductBarcodes/".encode('utf-8')
+        self.digiPN="https://api.digikey.com/Search/v3/Products/".encode('utf-8')
+        self.mouserPN="https://api.mouser.com/api/v1/search/partnumber?apiKey=".encode('utf-8')
+        self.lcscSCH="https://lcsc.com/search?q=".encode('utf-8')
+        self.barcode=SimpleNamespace()
+        self.query=SimpleNamespace()
+        self.query.suppliers={
+            'digikey':{
+                '1D':lambda:requests.get(url=self.digi1D+self.barcode.barcode, headers=digi_headers),
+                '2D':lambda:requests.get(url=self.digi2D+self.barcode.barcode, headers=digi_headers),
+                'pn':lambda:requests.get(url=self.digiPN+self.barcode.response['DigiKeyPartNumber'].encode(),headers=digi_headers),
+            },
+            'mouser':{
+                '1D':lambda:print('mouser1d'),
+                '2D':lambda:requests.post(url=self.mouserPN+cred['mouser_key'].encode('utf-8'),data=self.barcode.mfgpart.encode(), headers=mouser_headers),
+            },
+            'lcsc':{
+                '1D':lambda:print('lcsc1d'),
+                '2D':lambda:webbrowser.open(self.lcscSCH+self.barcode.supplierPN.encode('utf-8')),
+            }
+        }
 
-
-        app_headers['X-DIGIKEY-Client-Id']=cred['client_id']
+        digi_headers['X-DIGIKEY-Client-Id']=cred['client_id']
         oauth_body['client_id']=cred['client_id']
         oauth_body['client_secret']=cred['client_secret']
         self.setup_body = {k: cred[k] for k in ('code','client_id','client_secret')}
@@ -64,7 +89,7 @@ class digikey:
                             latest_refresh_token=latest['refresh_token']
                             latest_access_token=latest['access_token']
                     oauth_body['refresh_token']=latest['refresh_token']
-                    app_headers['authorization']= "Bearer "+latest['access_token']
+                    digi_headers['authorization']= "Bearer "+latest['access_token']
             except Exception as e:
                 printlevel(1,'Error loading/saving credentials to file: ',e)
     def api_setup(self):
@@ -108,51 +133,76 @@ class digikey:
             try:
                 print('Before Refresh:')
                 print('\t',oauth_body['refresh_token'])
-                print('\t',app_headers['authorization'])
+                print('\t',digi_headers['authorization'])
                 apidata.write(json.dumps(data,sort_keys=True))
                 apidata.write('\n')
                 oauth_body['refresh_token']=data['refresh_token']
-                app_headers['authorization']= "Bearer "+data['access_token']
+                digi_headers['authorization']= "Bearer "+data['access_token']
                 print('After Refresh:')
                 print('\t',oauth_body['refresh_token'])
-                print('\t',app_headers['authorization'])
+                print('\t',digi_headers['authorization'])
                 print('Updated Records File: {}\n'.format(self.RECORDS_FILE))
                 return True
             except Exception as e:
                 print('Refresh Error:',e)
                 return False
 
-    def barcode_search(self,barcode,barcode_type,product_info=False):
-        if '2d' in barcode_type:
-            baseurl=self.url2D
-        else:
-            baseurl=self.url1D
-        self.barcode = barcode
+    def search(self,scan,product_info=False):
+        # Determine barcode type and supplier
+        self.barcode.barcode=scan.data
+        if self.DEBUG: print(scan)
         try:
-            URL=baseurl+self.barcode
-            r = requests.get(url=URL, headers=app_headers)
-            api_response=r.json()
-            api_response['Barcode']=self.barcode.decode()
-            if 'ErrorMessage' in api_response:
-                if 'Bearer token  expired' in api_response['ErrorMessage']:
+            if 'QRCODE' in scan.type:
+                self.barcode.type='2D'
+                self.barcode.supplier='lcsc'
+                supPN=re.split(r",",self.barcode.barcode.decode())
+                self.barcode.supplierPN=supPN[1][12:]
+            elif 'CODE128' in scan.type:
+                self.barcode.type='1D'
+                if self.barcode.barcode.decode().isdecimal():
+                    if len(self.barcode.barcode) > 10:
+                        self.barcode.supplier='digikey'
+                    else:
+                        print("Short barcode... possibly Mouser Line Item or QTY: ".format(self.barcode.barcode.decode()))
+                else:
+                    self.barcode.supplier='mouser'
+            else:
+                print('Unknown supplier')
+        except AttributeError:
+            self.barcode.type='2D'
+            if b'>[)>' in self.barcode.barcode:
+                self.barcode.supplier='mouser'
+                mfgpart=re.split(r"",self.barcode.barcode.decode())
+                print('mfgpart:',mfgpart)
+                if '1P' in mfgpart[3]:
+                    self.barcode.mfgpart="{\"SearchByPartRequest\": {\"mouserPartNumber\": \""+mfgpart[3][2:]+"\",}}"
+            else:
+                self.barcode.supplier='digikey'
+
+        # make supplier-specific API query 
+        try:
+            r=self.query.suppliers[self.barcode.supplier][self.barcode.type]()
+            self.barcode.response=r.json()
+            if 'ErrorMessage' in self.barcode.response:
+                if 'Bearer token  expired' in self.barcode.response['ErrorMessage']:
                     if self.refresh_token():
-                        r = requests.get(url=URL, headers=app_headers)
-                        api_response=r.json()
-                        api_response['Barcode']=self.barcode.decode()
+                        r=self.query.suppliers[self.barcode.supplier][self.barcode.type]()
+                        self.barcode.response=r.json()
                     else:
                         print('Fatal error during token refresh ')
                         return
             if product_info:
+                self.barcode.type='pn'
                 try:
-                    URL=self.urlProd+api_response["DigiKeyPartNumber"].encode('utf-8')
-                    r = requests.get(url=URL, headers=app_headers)
-                    api_response.update(r.json())
+                    r=self.query.suppliers[self.barcode.supplier][self.barcode.type]()
+                    self.barcode.response.update(r.json())
                 except Exception as e:
                     print('Error during Product Info request:',e)
-            print(json.dumps(api_response,indent=3,sort_keys=True))
-            return api_response
+            print(json.dumps(self.barcode.response,indent=3,sort_keys=True))
+            return self.barcode
         except Exception as e:
             print('Error during API request:',e)
+            if self.DEBUG:print('Attributes: {}'.format(self.barcode))
             return
 
 
