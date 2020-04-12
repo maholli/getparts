@@ -1,6 +1,6 @@
 # Barcode scanner
 
-Scan component bags (Digikey, Mouser, and LCSC) and return product information. Uses Python3. Works for 2D data matrix QR codes and 1D barcodes.
+Scan electrical component bags (Digikey, Mouser, and LCSC) and return product information. Uses Python3. Works for 2D DataMatrix,  QR, and 1D barcodes.
 
 - ![barcode_api.py](/barcode_api.py) handles all the API calls and refresh tokens (when necessary).
 - ![barcode_scan.py](/barcode_scan.py) is an example using a webcam. There are lots of debug messages to help others troubleshoot their own scripts.
