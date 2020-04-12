@@ -33,7 +33,8 @@
         app_credentials= {
             'code': 'AAA',
             'client_id': "BBB",
-            'client_secret': "CCC"
+            'client_secret': "CCC",
+            'mouser_key': "DDD"
         }
 
 10. Now ensure you have the necessary python3 libraries:
@@ -73,7 +74,8 @@
         app_credentials= {
             'code': 'AAA',
             'client_id': "BBB",
-            'client_secret': "CCC"
+            'client_secret': "CCC",
+            'mouser_key': "DDD"
         }
 
 16. After updating the 3 `app_credential` fields, save the `barcode_scan.py` file and run again.
@@ -93,3 +95,21 @@
 18. If you have a webcam the example script will try and connect.
 
 19. To return detailed product information, change `product_info=False` to `product_info=True`.
+
+## Mouser Setup
+
+Mouser's API is easier to set up but much more limited in its capability.
+
+1. Navigate to https://www.mouser.com/MyMouser/MouserSearchApplication.aspx and register for an API account
+
+2. You'll recieve an email shortly containing an "API Key."
+
+3. Enter the API key into the `DDD` field in barcode_scan.py:
+
+        app_credentials= {
+            'code': 'AAA',
+            'client_id': "BBB",
+            'client_secret': "CCC",
+            'mouser_key': "DDD"
+        }
+
