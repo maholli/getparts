@@ -11,8 +11,8 @@ Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and ru
 # In Action
 
 <p align="middle">
-  <img width="500" src="images/demo.gif">
-  <img width="200" src="https://user-images.githubusercontent.com/29153441/79077389-25e6db80-7cb6-11ea-9a7c-d49c9db015c4.png">
+  <img width="700" src="images/demo.gif">
+  <img width="300" src="https://user-images.githubusercontent.com/29153441/79077389-25e6db80-7cb6-11ea-9a7c-d49c9db015c4.png">
 </p>
 
 # Supplier Barcodes
