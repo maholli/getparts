@@ -5,10 +5,15 @@ Scan electrical component bags (Digikey, Mouser, and LCSC) and return product in
 - ![barcode_api.py](/barcode_api.py) handles all the API calls and refresh tokens (when necessary).
 - ![barcode_scan.py](/barcode_scan.py) is an example using a webcam. There are lots of debug messages to help others troubleshoot their own scripts.
 
-Some setup required. See 👇 for a guide setting up a Digikey API account and running the python script.
-### ![Step-by-step Tutorial](/tutorial.md)
+Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and running the python script.
+### ![📃 Step-by-step Tutorial](/tutorial.md)
 
-![images/demo.gif](images/demo.gif)
+# In Action
+
+<p align="middle">
+  <img width="500" src="images/demo.gif">
+  <img width="200" src="https://user-images.githubusercontent.com/29153441/79077389-25e6db80-7cb6-11ea-9a7c-d49c9db015c4.png">
+</p>
 
 # Supplier Barcodes
 
