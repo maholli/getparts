@@ -41,7 +41,7 @@
 
     Windows Powershell, Linux, & MacOS:
 
-        pip3 install pyzbar, pylibmtx
+        pip3 install pyzbar, pylibmtx, opencv-python
 
     and if you want to use a webcam to scan barcodes:
 
