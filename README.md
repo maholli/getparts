@@ -23,6 +23,6 @@ Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and ru
 - [ ] Mouser: There's a part number query API, but no native barcode searching. 
    - ✔ 2D: PN is extracted from DataMatrix (always starts with `>[)>`) and searched using Mouser's API
    - ➖ 1D: Script can read the barcodes, but currently has no way of telling which barcode value correlates to which property because there are seperate 1D barcodes for `Cust PO`, `Line Items`, `Mouser P/N`, `MFG P/N`, `QTY`, `COO`, and `Invoice No`.
-- [ ]  LCSC: No API. 
-   - ➖ 2D: Some of my LCSC bags have QR barcodes (1 in 10 I'd guess). The QR code contains: `productCode`, `orderNo`, `pickerNo`,`pickTime`, and `checkCode`. So far all the tool can do is search LCSC for the PN but the user needs to navigate the page and extract the info. Need to write a javascript web scraper. 
+- [ ]  LCSC: No API. So we have to scrape.
+   - ✔ 2D: Some of my LCSC bags have QR barcodes (1 in 10 I'd guess). The QR code contains: `productCode`, `orderNo`, `pickerNo`,`pickTime`, and `checkCode`. So far all the tool can do is search LCSC for the PN but the user needs to navigate the page and extract the info. Need to write a javascript web scraper. 
    - ❌ 1D: String ~10 characters in length. Can't extract anything useful from these.
