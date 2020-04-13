@@ -2,19 +2,12 @@
 
 Getparts is a Python3 tool takes a supplier barcode value as an input and returns component information. Currently works for most Digi-Key, Mouser, and some LCSC bags.
 
-## Barcode Status
-
-Digi-Key
-   - 2D: ✔
-   - 1D: ✔
-
-Mouser
-   - 2D: ✔
-   - 1D: ➖
-
-LCSC
-   - 2D: ✔
-   - 1D: ❌
+### Barcode Status
+|          	| 2D 	| 1D 	|
+|----------	|----	|----	|
+| Digi-Key 	| ✔  	| ✔  	|
+| Mouser   	| ✔  	| ✔  	|
+| LCSC     	| ✔  	| ❌  	|
 
 # Why?
 
