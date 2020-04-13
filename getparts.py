@@ -2,7 +2,7 @@
 Python3
 
 API tool for electronic component suppliers (digikey, mouser, LCSC)
-https://github.com/maholli/barcode-scanner
+https://github.com/maholli/getparts
 M.Holliday
 '''
 
@@ -35,7 +35,7 @@ mouser_headers = {
 def printlevel(level,text):
     print('\t'*level+str(text))
 
-class barcode:
+class API:
     RECORDS_FILE = 'api_records_digi.txt'
     def __init__(self,cred,debug=False):
         self.DEBUG=debug

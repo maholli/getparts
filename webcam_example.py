@@ -2,7 +2,7 @@
 Python3
 
 Example barcode scanner for electronic component suppliers (digikey, mouser, LCSC)
-https://github.com/maholli/barcode-scanner
+https://github.com/maholli/getparts
 M.Holliday
 '''
 
@@ -11,7 +11,7 @@ from pylibdmtx import pylibdmtx
 import time
 import cv2, codecs
 import numpy as np
-import barcode_api
+import getparts
 import os.path 
 from os import path
 
@@ -23,7 +23,7 @@ app_credentials= {
 }
 
 # initialize barcode_api with our API credentials
-api = barcode_api.barcode(app_credentials,debug=False)
+api = getparts.API(app_credentials,debug=False)
 state='Searching'
 states={
     'Searching':(0,0,255),
@@ -92,5 +92,5 @@ while True:
     if key == ord("q"):
         break
 
-print("[INFO] cleaning up...")
+print("Cleaning up...")
 cv2.destroyAllWindows()
