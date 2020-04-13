@@ -6,7 +6,7 @@ Getparts is a Python3 tool takes a supplier barcode value as an input and return
 |          	| 2D 	| 1D 	|
 |----------	|----	|----	|
 | Digi-Key 	| ✔  	| ✔  	|
-| Mouser   	| ✔  	| ✔  	|
+| Mouser   	| ✔  	| ➖  	|
 | LCSC     	| ✔  	| ❌  	|
 
 # Why?
