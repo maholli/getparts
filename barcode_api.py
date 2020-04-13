@@ -11,8 +11,8 @@ import json, re
 import os.path 
 from os import path
 from types import SimpleNamespace
-import webbrowser
-
+from requests_html import HTMLSession
+from bs4 import BeautifulSoup
 oauth_headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
 }
@@ -43,7 +43,6 @@ class barcode:
         self.digi1D="https://api.digikey.com/Barcoding/v3/ProductBarcodes/".encode('utf-8')
         self.digiPN="https://api.digikey.com/Search/v3/Products/".encode('utf-8')
         self.mouserPN="https://api.mouser.com/api/v1/search/partnumber?apiKey=".encode('utf-8')
-        self.lcscSCH="https://lcsc.com/search?q=".encode('utf-8')
         self.barcode=SimpleNamespace()
         self.query=SimpleNamespace()
         self.query.suppliers={
@@ -54,11 +53,11 @@ class barcode:
             },
             'mouser':{
                 '1D':lambda:print('mouser1d'),
-                '2D':lambda:requests.post(url=self.mouserPN+cred['mouser_key'].encode('utf-8'),data=self.barcode.mfgpart.encode(), headers=mouser_headers),
+                '2D':lambda:requests.post(url=self.mouserPN+cred['mouser_key'].encode('utf-8'),data=self.barcode.mfpn.encode(), headers=mouser_headers),
             },
             'lcsc':{
                 '1D':lambda:print('lcsc1d'),
-                '2D':lambda:webbrowser.open(self.lcscSCH+self.barcode.supplierPN.encode('utf-8')),
+                '2D':lambda:lcsc.scrape(self.barcode.supplierPN),
             }
         }
 
@@ -175,7 +174,7 @@ class barcode:
                 mfgpart=re.split(r"",self.barcode.barcode.decode())
                 print('mfgpart:',mfgpart)
                 if '1P' in mfgpart[3]:
-                    self.barcode.mfgpart="{\"SearchByPartRequest\": {\"mouserPartNumber\": \""+mfgpart[3][2:]+"\",}}"
+                    self.barcode.mfpn="{\"SearchByPartRequest\": {\"mouserPartNumber\": \""+mfgpart[3][2:]+"\",}}"
             else:
                 self.barcode.supplier='digikey'
 
@@ -204,10 +203,40 @@ class barcode:
             print('Error during API request:',e)
             if self.DEBUG:print('Attributes: {}'.format(self.barcode))
             return
-
-
-# READS FROM LATIN-1 ENCODED FILE
-# import codecs
-# with open('barcodes.csv','rb') as file:
-#     for line in file:
-#         QR.append(line.strip())
+class lcscdata:
+    def __init__(self,val):
+        self.value=val
+    def json(self):
+        return self.value
+class lcsc:
+    def scrape(pn):
+        lcscPN=pn
+        # create an HTML Session object
+        session = HTMLSession()
+        # Use the object above to connect to needed webpage
+        r1 = session.get("https://lcsc.com/search?q="+lcscPN)
+        # Run any JavaScript code on webpage
+        r1.html.render()
+        # Find absolute link for product page
+        a=r1.html.find('body > div#lcsc.push-body > div#global_search.contianer > div.table-content > section > div > div#product_table_list > div.product-list-area.table-area > table')
+        links=a[0].absolute_links
+        for link in links:
+            if lcscPN+'.html' in link:
+                product_page=link
+        # Load product page
+        direct=session.get(product_page)
+        soup = BeautifulSoup(direct.html.html, "lxml")
+        # Find correct product table
+        table=soup.find('table', attrs={'class':'products-specifications'}) # 2nd table
+        table_body = table.find('tbody')
+        rows = table_body.find_all('tr')
+        result=lcscdata({})
+        for row in rows:
+            cols = row.find_all('td')
+            cols = [ele.text.strip() for ele in cols]
+            line=[ele for ele in cols if ele]
+            try:
+                result.value.update({line[0]:line[1]})
+            except:
+                pass
+        return result
