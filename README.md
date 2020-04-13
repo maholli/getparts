@@ -17,11 +17,11 @@ Nearly every electrical component ordered online will be packaged and marked wit
 
 An example script is included that lets you use a webcam (laptop or usb webcam) to scan barcodes on component bags (Digikey, Mouser, and LCSC). This barcode value is fed into getparts which then tries a variety of techinques to retrieve the part information. Uses Python3. Works for 2D DataMatrix,  QR, and 1D barcodes.
 
-Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and running the python script.
-### ![📃 Step-by-step Tutorial](/tutorial.md)
-
 - ![getparts.py](/getparts.py) handles all the API calls and refresh tokens (when necessary).
 - ![webcam_example.py](/webcam_example.py) is an example using a webcam. There are lots of debug messages to help others troubleshoot their own scripts.
+
+Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and running the python script.
+### ![📃 Step-by-step Tutorial](/tutorial.md)
 
 # In Action
 
