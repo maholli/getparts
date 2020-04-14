@@ -40,6 +40,7 @@ Some setup required. See 👇 for a guide setting up a Digikey/Mouser API and ru
    - ➖ 1D: Script can read the barcodes, but currently has no way of telling which barcode value correlates to which property because there are seperate 1D barcodes for `Cust PO`, `Line Items`, `Mouser P/N`, `MFG P/N`, `QTY`, `COO`, and `Invoice No`.
 - [ ]  LCSC: No API. So we have to scrape.
    - ✔ 2D: Some of my LCSC bags have QR barcodes (1 in 10 I'd guess). The QR code contains: `productCode`, `orderNo`, `pickerNo`,`pickTime`, and `checkCode`. So far all the tool can do is search LCSC for the PN but the user needs to navigate the page and extract the info. Need to write a javascript web scraper. 
-   - ❌ 1D: String ~10 characters in length. Can't extract anything useful from these.
-
+   - ❌ 1D: String ~10 characters in length. Can't extract anything useful from these.<br><br>
+   Since the majority of LCSC bags don't (currently) have QR codes, I'm curious how feasible OCR on the LCSC PN will be. Using tesseract:<br>![](/images/ocr.jpg) it seems doable, but this will heavily depend on user environment. More to come.
+   
 This tool was developed to aid inventory management via [InvenTree](https://inventree.github.io/)
